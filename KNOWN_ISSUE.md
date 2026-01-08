@@ -1,26 +1,24 @@
 # Known Issue: runtime out_of_range while building histogram
 
-## Issue type
+## Status: FIXED
 
-Runtime error: `std::out_of_range` thrown during histogram updates.
+## Issue (now resolved)
 
-## Trigger conditions
+Runtime error: `std::out_of_range` was thrown during histogram updates when processing INT16_MIN (-32768).
 
-When processing certain extreme 16-bit PCM inputs (rare edge values), histogram building can throw.
+## Root cause
 
-## Expected vs actual
+The histogram bucket calculation used `abs_i16_fast()` which cannot represent the magnitude of INT16_MIN (32768) as a signed int16_t. This caused negation overflow, resulting in an invalid magnitude that fell outside histogram bounds, triggering an `.at()` bounds check failure.
 
-- Expected: histogram building should not throw for any valid 16-bit PCM sample.
-- Actual: `AudioHistogram::addSample(-32768)` can throw `std::out_of_range`.
+## Solution
 
-## Where it happens
+Modified `AudioHistogram::bucketFor()` to:
+1. Detect INT16_MIN explicitly and assign magnitude 32768
+2. Clamp the computed bucket index to the valid range [0, buckets-1] to guard against boundary conditions
 
-- Public API: `AudioHistogram::addSample(std::int16_t)`
-- File: `src/audio_histogram.cpp`
+## Testing
 
-## Reproduction
-
-Run the automated tests; they include:
-
-- A direct unit test calling `addSample(-32768)`.
-- A small file-driven test that reads `data/pcm_samples.txt` containing `-32768`.
+All automated tests now pass, including:
+- Direct unit test calling `addSample(INT16_MIN)` with no exception
+- File-driven test loading `data/pcm_samples.txt` containing -32768
+- Verification that INT16_MIN maps to the expected histogram bucket (bucket 63 for 64-bucket histogram)

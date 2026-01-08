@@ -72,9 +72,21 @@ std::int16_t AudioHistogram::preprocess(std::int16_t sample) {
 }
 
 std::size_t AudioHistogram::bucketFor(std::int16_t sample) const {
-    const std::int16_t magnitude = dsp::detail::abs_i16_fast(sample);
+    // Special handling for INT16_MIN: its absolute value is 32768, which
+    // doesn't fit in int16_t, so we compute it as an unsigned value.
+    std::uint16_t magnitude;
+    if (sample == std::numeric_limits<std::int16_t>::min()) {
+        magnitude = 32768;
+    } else {
+        magnitude = static_cast<std::uint16_t>(
+            dsp::detail::abs_i16_fast(sample));
+    }
+
     const std::size_t bucketWidth = std::max<std::size_t>(
         1, dsp::detail::bucket_width(m_cfg.maxMagnitude, m_counts.size()));
 
-    return static_cast<std::size_t>(magnitude) / bucketWidth;
+    const std::size_t bucket = static_cast<std::size_t>(magnitude) / bucketWidth;
+    
+    // Clamp bucket to valid range to handle edge cases
+    return std::min(bucket, m_counts.size() - 1);
 }
