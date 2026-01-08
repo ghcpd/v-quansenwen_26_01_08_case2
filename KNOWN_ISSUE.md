@@ -1,26 +1,18 @@
-# Known Issue: runtime out_of_range while building histogram
+# Known Issue: runtime out_of_range while building histogram (resolved)
 
 ## Issue type
 
-Runtime error: `std::out_of_range` thrown during histogram updates.
+Runtime error: `std::out_of_range` thrown during histogram updates (fixed).
 
-## Trigger conditions
+## Summary of the fix
 
-When processing certain extreme 16-bit PCM inputs (rare edge values), histogram building can throw.
+- The absolute-magnitude helper now returns an unsigned magnitude in the full range 0..32768 and handles `INT16_MIN` safely.
+- The histogram bucket computation clamps the top value so the maximum magnitude maps to the last bucket (no out-of-range index).
 
-## Expected vs actual
+## Verification
 
-- Expected: histogram building should not throw for any valid 16-bit PCM sample.
-- Actual: `AudioHistogram::addSample(-32768)` can throw `std::out_of_range`.
+Build and run the tests:
 
-## Where it happens
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug && cmake --build build --config Debug && ctest --test-dir build -C Debug --output-on-failure
 
-- Public API: `AudioHistogram::addSample(std::int16_t)`
-- File: `src/audio_histogram.cpp`
-
-## Reproduction
-
-Run the automated tests; they include:
-
-- A direct unit test calling `addSample(-32768)`.
-- A small file-driven test that reads `data/pcm_samples.txt` containing `-32768`.
+The unit tests now pass.
