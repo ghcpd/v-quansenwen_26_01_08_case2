@@ -72,9 +72,12 @@ std::int16_t AudioHistogram::preprocess(std::int16_t sample) {
 }
 
 std::size_t AudioHistogram::bucketFor(std::int16_t sample) const {
-    const std::int16_t magnitude = dsp::detail::abs_i16_fast(sample);
+    const std::uint16_t magnitude = dsp::detail::abs_i16_fast(sample);
     const std::size_t bucketWidth = std::max<std::size_t>(
         1, dsp::detail::bucket_width(m_cfg.maxMagnitude, m_counts.size()));
 
-    return static_cast<std::size_t>(magnitude) / bucketWidth;
+    const std::size_t idx = static_cast<std::size_t>(magnitude) / bucketWidth;
+    // Ensure the largest magnitude falls into the last bucket instead of
+    // producing an out-of-range index when it exactly equals maxMagnitude.
+    return std::min(idx, m_counts.size() - 1);
 }

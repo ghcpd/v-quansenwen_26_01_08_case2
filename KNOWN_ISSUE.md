@@ -24,3 +24,18 @@ Run the automated tests; they include:
 
 - A direct unit test calling `addSample(-32768)`.
 - A small file-driven test that reads `data/pcm_samples.txt` containing `-32768`.
+
+## Status: Fixed
+
+This issue has been fixed. The fix ensures magnitudes are computed without overflow for
+`INT16_MIN` and clamps bucket indices so the maximum magnitude maps to the last bucket.
+
+To verify locally:
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug && \
+	cmake --build build --config Debug && \
+	ctest --test-dir build -C Debug --output-on-failure
+```
+
+All tests should pass (100% tests passed).
