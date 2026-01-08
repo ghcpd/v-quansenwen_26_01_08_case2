@@ -1,0 +1,23 @@
+You are given a small C++20/CMake project on Windows 11 (MinGW/Ninja). The project builds an “audio amplitude histogram” from 16-bit PCM samples. There is an intentionally embedded runtime issue: when processing certain extreme 16-bit values (notably `-32768`), histogram building can throw `std::out_of_range`, and the automated tests currently fail.
+
+Your task: fix the bug so all tests pass, with minimal, clean changes.
+
+Repository hints (do not assume root cause; diagnose from behavior/tests):
+- Failing tests are in tests/test_audio_histogram.cpp
+- Implementation is in src/audio_histogram.cpp and header in src/audio_histogram.h
+- Repro data file: data/pcm_samples.txt
+- Build/test command (must succeed after your fix):
+  - `cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug && cmake --build build --config Debug && ctest --test-dir build -C Debug --output-on-failure`
+
+Requirements:
+1. Make the project pass the existing tests without runtime errors.
+2. Keep the public API stable unless you have a strong reason (if you change it, justify it clearly).
+3. Avoid changing the tests unless absolutely necessary; if you do, explain why and keep changes minimal.
+4. No new heavy dependencies. Keep it portable for Windows 11.
+5. Update documentation only if it improves clarity for running/debugging (do not add “how the bug occurred” writeups; stick to behavior and fix summary).
+
+Deliverables:
+- A concise explanation of what you changed and why (behavior-focused).
+- A patch-style diff or clear file-by-file edits.
+- The exact command(s) you ran and the expected test result summary (e.g., “100% tests passed”).
+- Update relevant documents.
