@@ -62,8 +62,8 @@ std::int16_t AudioHistogram::preprocess(std::int16_t sample) {
 
     // Optional noise gate based on magnitude.
     if (m_cfg.noiseGate > 0) {
-        const std::int16_t mag = dsp::detail::abs_i16_fast(y);
-        if (static_cast<std::uint16_t>(mag) < m_cfg.noiseGate) {
+        const std::uint16_t mag = dsp::detail::abs_i16_fast(y);
+        if (mag < m_cfg.noiseGate) {
             return 0;
         }
     }
@@ -72,9 +72,11 @@ std::int16_t AudioHistogram::preprocess(std::int16_t sample) {
 }
 
 std::size_t AudioHistogram::bucketFor(std::int16_t sample) const {
-    const std::int16_t magnitude = dsp::detail::abs_i16_fast(sample);
+    const std::uint16_t magnitude = dsp::detail::abs_i16_fast(sample);
+    // Cap magnitude to one less than maxMagnitude so the highest input maps into the last bucket.
+    const std::uint16_t capped = (magnitude >= m_cfg.maxMagnitude) ? (m_cfg.maxMagnitude - 1) : magnitude;
     const std::size_t bucketWidth = std::max<std::size_t>(
         1, dsp::detail::bucket_width(m_cfg.maxMagnitude, m_counts.size()));
 
-    return static_cast<std::size_t>(magnitude) / bucketWidth;
+    return static_cast<std::size_t>(capped) / bucketWidth;
 }
