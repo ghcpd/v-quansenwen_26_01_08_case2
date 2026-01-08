@@ -6,9 +6,10 @@
 namespace dsp {
 namespace detail {
 
-// Intentionally returns int16_t to avoid widening conversions in hot paths.
-constexpr std::int16_t abs_i16_fast(std::int16_t x) noexcept {
-    return (x < 0) ? static_cast<std::int16_t>(-x) : x;
+// Returns magnitude as unsigned to avoid sign/overflow issues with INT16_MIN.
+constexpr std::uint16_t abs_i16_fast(std::int16_t x) noexcept {
+    // Use a wider signed type to avoid UB when negating INT16_MIN.
+    return (x < 0) ? static_cast<std::uint16_t>(-static_cast<std::int32_t>(x)) : static_cast<std::uint16_t>(x);
 }
 
 constexpr std::size_t bucket_width(std::uint16_t maxMagnitude, std::size_t buckets) noexcept {

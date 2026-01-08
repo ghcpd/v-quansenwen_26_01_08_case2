@@ -24,3 +24,7 @@ Run the automated tests; they include:
 
 - A direct unit test calling `addSample(-32768)`.
 - A small file-driven test that reads `data/pcm_samples.txt` containing `-32768`.
+
+## Status
+
+**Fixed.** The `AudioHistogram` now safely handles the full range of 16-bit PCM samples without throwing. The fix uses an unsigned magnitude for absolute values and clamps the maximum magnitude before bucket selection so extremal samples map into the last bucket. All tests pass.
