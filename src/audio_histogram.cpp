@@ -12,7 +12,7 @@ AudioHistogram::AudioHistogram(std::size_t buckets, std::uint16_t maxMagnitude)
 }
 
 AudioHistogram::AudioHistogram(Config cfg)
-    : m_counts(cfg.buckets, 0), m_cfg(cfg) {
+    : m_counts(cfg.buckets + 1, 0), m_cfg(cfg) {
     if (m_cfg.buckets == 0) {
         throw std::invalid_argument("buckets must be > 0");
     }
@@ -62,8 +62,8 @@ std::int16_t AudioHistogram::preprocess(std::int16_t sample) {
 
     // Optional noise gate based on magnitude.
     if (m_cfg.noiseGate > 0) {
-        const std::int16_t mag = dsp::detail::abs_i16_fast(y);
-        if (static_cast<std::uint16_t>(mag) < m_cfg.noiseGate) {
+        const std::uint16_t mag = static_cast<std::uint16_t>(dsp::detail::abs_i16_fast(y));
+        if (mag < m_cfg.noiseGate) {
             return 0;
         }
     }
@@ -72,9 +72,10 @@ std::int16_t AudioHistogram::preprocess(std::int16_t sample) {
 }
 
 std::size_t AudioHistogram::bucketFor(std::int16_t sample) const {
-    const std::int16_t magnitude = dsp::detail::abs_i16_fast(sample);
+    const std::uint16_t magnitude = static_cast<std::uint16_t>(dsp::detail::abs_i16_fast(sample));
     const std::size_t bucketWidth = std::max<std::size_t>(
-        1, dsp::detail::bucket_width(m_cfg.maxMagnitude, m_counts.size()));
+        1, dsp::detail::bucket_width(m_cfg.maxMagnitude, m_cfg.buckets));
 
-    return static_cast<std::size_t>(magnitude) / bucketWidth;
+    const std::size_t idx = static_cast<std::size_t>(magnitude) / bucketWidth;
+    return (idx > m_cfg.buckets) ? m_cfg.buckets : idx;
 }

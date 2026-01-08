@@ -34,6 +34,11 @@ TEST_CASE("AudioHistogram: INT16_MIN should not throw") {
     CHECK_NOTHROW(hist.addSample(minSample));
 }
 
+TEST_CASE("AudioHistogram: storage reserves slot for maxMagnitude") {
+    AudioHistogram hist(64);
+    CHECK_EQ(hist.counts().size(), hist.buckets() + 1);
+}
+
 TEST_CASE("AudioHistogram: file-driven load with INT16_MIN should not throw and should increment expected bucket") {
     AudioHistogram hist(64);
     const auto samples = readSamplesFile("data/pcm_samples.txt");

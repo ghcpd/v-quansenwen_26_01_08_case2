@@ -32,7 +32,7 @@ From the repo root:
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug && cmake --build build --config Debug && ctest --test-dir build -C Debug --output-on-failure
 ```
 
-Expected: tests currently **fail** due to the intentionally embedded issue.
+Status: the edge-case in this repository has been fixed locally; the test-suite verifies the fix (all tests pass).
 
 ## What this demonstrates
 

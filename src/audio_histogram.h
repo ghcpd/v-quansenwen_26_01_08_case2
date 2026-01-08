@@ -38,7 +38,7 @@ public:
     void addSamples(const std::vector<std::int16_t>& samples);
 
     const std::vector<std::size_t>& counts() const noexcept { return m_counts; }
-    std::size_t buckets() const noexcept { return m_counts.size(); }
+    std::size_t buckets() const noexcept { return m_cfg.buckets; }
 
     const Config& config() const noexcept { return m_cfg; }
     const Stats& stats() const noexcept { return m_stats; }

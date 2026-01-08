@@ -24,3 +24,8 @@ Run the automated tests; they include:
 
 - A direct unit test calling `addSample(-32768)`.
 - A small file-driven test that reads `data/pcm_samples.txt` containing `-32768`.
+
+
+## Status
+
+Fixed — the histogram now handles the full int16 range without throwing (see the test-suite result).
