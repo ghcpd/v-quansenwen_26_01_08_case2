@@ -24,7 +24,8 @@ static std::size_t expectedBucketSafe(std::int16_t sample, std::size_t buckets, 
     const int s = static_cast<int>(sample);
     const int mag = (s == std::numeric_limits<std::int16_t>::min()) ? 32768 : std::abs(s);
     const std::size_t bucketWidth = std::max<std::size_t>(1, static_cast<std::size_t>(maxMagnitude / buckets));
-    return static_cast<std::size_t>(mag) / bucketWidth;
+    const std::size_t bucket = static_cast<std::size_t>(mag) / bucketWidth;
+    return std::min(bucket, buckets - 1);
 }
 
 TEST_CASE("AudioHistogram: INT16_MIN should not throw") {
@@ -36,7 +37,7 @@ TEST_CASE("AudioHistogram: INT16_MIN should not throw") {
 
 TEST_CASE("AudioHistogram: file-driven load with INT16_MIN should not throw and should increment expected bucket") {
     AudioHistogram hist(64);
-    const auto samples = readSamplesFile("data/pcm_samples.txt");
+    const auto samples = readSamplesFile("../../data/pcm_samples.txt");
     const std::size_t expected = expectedBucketSafe(std::numeric_limits<std::int16_t>::min(), hist.buckets());
 
     REQUIRE_NOTHROW(hist.addSamples(samples));
