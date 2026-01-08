@@ -2,13 +2,17 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 
 namespace dsp {
 namespace detail {
 
-// Intentionally returns int16_t to avoid widening conversions in hot paths.
-constexpr std::int16_t abs_i16_fast(std::int16_t x) noexcept {
-    return (x < 0) ? static_cast<std::int16_t>(-x) : x;
+// Intentionally returns uint16_t to handle INT16_MIN correctly.
+constexpr std::uint16_t abs_i16_fast(std::int16_t x) noexcept {
+    if (x == std::numeric_limits<std::int16_t>::min()) {
+        return 32768;
+    }
+    return (x < 0) ? static_cast<std::uint16_t>(-x) : static_cast<std::uint16_t>(x);
 }
 
 constexpr std::size_t bucket_width(std::uint16_t maxMagnitude, std::size_t buckets) noexcept {

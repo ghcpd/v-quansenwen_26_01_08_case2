@@ -2,8 +2,8 @@
 
 A small, near-real-world C++ module that builds an amplitude histogram from 16-bit PCM audio samples.
 
-This repo intentionally contains a **reproducible runtime issue**:
-certain extreme input values can cause a **runtime `std::out_of_range` exception** while building the histogram.
+This repo contained a **reproducible runtime issue** that has been fixed:
+certain extreme input values caused a **runtime `std::out_of_range` exception** while building the histogram.
 
 ## Project structure
 
@@ -32,12 +32,12 @@ From the repo root:
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug && cmake --build build --config Debug && ctest --test-dir build -C Debug --output-on-failure
 ```
 
-Expected: tests currently **fail** due to the intentionally embedded issue.
+Expected: tests **pass** after fixing the runtime issue.
 
 ## What this demonstrates
 
 - A realistic data-processing module (audio amplitude histogram)
 - A simple but non-trivial runtime failure scenario
-- Clear failing tests that reproduce the issue
+- Clear tests that validate the fix
 
-See `KNOWN_ISSUE.md` for details.
+See `KNOWN_ISSUE.md` for details on the original issue.
